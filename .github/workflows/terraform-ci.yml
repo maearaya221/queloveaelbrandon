@@ -14,14 +14,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        run: terraform init
-
-      # 1. TFLint
-      - name: Run TFLint
-        uses: terraform-linters/setup-tflint@v3
+      # 1️⃣ Análisis estático (TFLint)
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
 
       - name: TFLint Init
         run: tflint --init
@@ -29,10 +26,21 @@ jobs:
       - name: TFLint Run
         run: tflint
 
-      # 2. Checkov
+      # 2️⃣ Análisis de seguridad (Checkov)
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
 
-      # 3. Validate
+      # 3️⃣ Validación Terraform
+      - name: Terraform Init
+        run: terraform init
+
       - name: Terraform Validate
         run: terraform validate
+
+      # 4️⃣ Políticas OPA
+      - name: Run OPA Policies
+        uses: open-policy-agent/opa-github-actions@v2
+        with:
+          policy-path: policies
